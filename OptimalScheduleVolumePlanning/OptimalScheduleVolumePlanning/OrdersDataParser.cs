@@ -42,7 +42,7 @@ public class OrdersDataParser
         do
         {
             line += (char)s;
-        } while (!CheckByteEqualTo(s = fileStream.ReadByte(), '\n') || !CheckByteEqualTo(s, -1));
+        } while (!CheckByteEqualTo(s = fileStream.ReadByte(), '\n') && !CheckByteEqualTo(s, -1));
 
         return line.Split(';');
     }
