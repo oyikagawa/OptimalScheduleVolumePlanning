@@ -4,15 +4,15 @@ using System.IO;
 
 public class OrdersDataParser
 {
-    private const string path = "input.txt";
+    private const string fileName = "inputOrders.txt";
     private const int orderFieldsAmount = 11;
 
     private FileStream fileStream;
     private List<Order> orders;
 
-	public List<Order> GetOrders(string inputPath)
+	public List<Order> GetOrders(string path)
     {
-        var curPath = inputPath.Contains(path) ? inputPath : Path.Combine(inputPath, path);
+        var curPath = path.Contains(fileName) ? path : Path.Combine(path, fileName);
         if (!File.Exists(curPath))
             return null;
 

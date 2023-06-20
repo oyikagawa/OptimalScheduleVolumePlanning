@@ -4,6 +4,8 @@
     public int Count;
     public long IdOrderMan;
 
+    public FormatPlanCutItem() { }
+
     public FormatPlanCutItem(int format, int count, long idOrderMan)
     {
         Format = format;

@@ -21,7 +21,7 @@ namespace OptimalScheduleVolumePlanning
             var parser = new OrdersDataParser();
             var orders = parser.GetOrders(inputFilePath);
 
-            var eSolver = new ExternalSolver();
+            var eSolver = new ExternalSolver(inputFilePath);
             var cuts = eSolver.Solve(orders, new WorkCenterMachine());
 
             var solver = new Solver();
