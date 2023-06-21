@@ -13,7 +13,7 @@ namespace OptimalScheduleVolumePlanning
                 [1] = new ProductionBoundaries(200, 240)
             };
 
-            Console.WriteLine("Write path to input file:");
+            Console.WriteLine("Enter input files folder path:");
             var inputFilePath = Console.ReadLine();
             if (inputFilePath == null)
                 return;
