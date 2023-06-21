@@ -23,43 +23,51 @@ public class Solver
             )).OrderBy(pair => pair.Date).ToList();
 
         var answerCuts = new List<FormatPlanCut>();
+        long previousType = -1;
 
         while (extendedCuts.Count > 0)
         {
-            var type = GetType(extendedCuts, orderById, productBoundaries);
+            var type = GetType(extendedCuts, productBoundaries, previousType);
 
-            var maxVolume = GetVolume(extendedCuts, type, productBoundaries);
+            GetVolume(extendedCuts, type, productBoundaries,
+                out double minVolume, out double maxVolume);
 
             var newExtentedCuts = new List<ExtendedCut>();
             var currentVolume = 0.0;
 
-            for (int i = 0; i < cuts.Count; i++)
-                if (extendedCuts[i].IdProductType == type && currentVolume < maxVolume)
+            var flag = true;
+            for (int i = 0; i < extendedCuts.Count; i++)
+                if (extendedCuts[i].IdProductType == type
+                    && (currentVolume <= minVolume || flag && currentVolume <= maxVolume))
                 {
                     answerCuts.Add(extendedCuts[i].Cut);
                     currentVolume += extendedCuts[i].Volume;
                 }
                 else
+                {
                     newExtentedCuts.Add(extendedCuts[i]);
+                    flag = false;
+                }
 
             extendedCuts = newExtentedCuts;
+            previousType = type;
         }
 
         return answerCuts;
     }
 
-    private long GetType(List<ExtendedCut> cuts, Dictionary<long, Order> orderById,
-        Dictionary<long, ProductionBoundaries> productBoundaries)
+    private long GetType(List<ExtendedCut> cuts,
+        Dictionary<long, ProductionBoundaries> productBoundaries, long previousType)
     {
         var volumes = cuts.GroupBy(cut => cut.IdProductType,
             (t, group) => new Tuple<long, double>(t, group.Select(c => c.Volume).Sum()))
             .ToDictionary(pair => pair.Item1, pair => pair.Item2);
 
         var min = volumes.ToDictionary(pair => pair.Key,
-            pair => Math.Ceiling(pair.Key / productBoundaries[pair.Key].MaximumVolumeInTons));
+            pair => Math.Ceiling(pair.Value / productBoundaries[pair.Key].MaximumVolumeInTons));
 
         var max = volumes.ToDictionary(pair => pair.Key,
-            pair => Math.Ceiling(pair.Key / productBoundaries[pair.Key].MinimumVolumeInTons));
+            pair => Math.Ceiling(pair.Value / productBoundaries[pair.Key].MinimumVolumeInTons));
 
         var sum = max.Select(pair => pair.Value).Sum();
 
@@ -67,18 +75,19 @@ public class Solver
             if (min[key] > sum - max[key])
                 return key;
 
-        var type = orderById[cuts.First().Cut.Items.First().IdOrderMan].IdProductType;
+        var type = cuts.First(cut => cut.IdProductType != previousType).IdProductType;
 
         return type;
     }
 
-    private double GetVolume(List<ExtendedCut> cuts, long type,
-        Dictionary<long, ProductionBoundaries> productBoundaries)
+    private bool GetVolume(List<ExtendedCut> cuts, long type,
+        Dictionary<long, ProductionBoundaries> productBoundaries,
+        out double bottom, out double top)
     {
         var flag = Culc(productBoundaries[type].MinimumVolumeInTons, productBoundaries[type].MaximumVolumeInTons,
             cuts.Where(cut => cut.IdProductType == type).Select(cut => cut.Volume).Sum(),
-            out double bottom, out double top);
-        return bottom;
+            out bottom, out top);
+        return flag;
     }
 
     private bool Culc(double minimum, double maximum, double value, out double bottom, out double top)

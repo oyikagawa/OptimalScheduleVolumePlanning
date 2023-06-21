@@ -9,8 +9,8 @@ namespace OptimalScheduleVolumePlanning
         {
             Dictionary<long, ProductionBoundaries> productBoundaries = new()
             {
-                [0] = new ProductionBoundaries(30, 70),
-                [1] = new ProductionBoundaries(30, 70)
+                [0] = new ProductionBoundaries(30, 1100),
+                [1] = new ProductionBoundaries(200, 240)
             };
 
             Console.WriteLine("Write path to input file:");
